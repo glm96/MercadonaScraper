@@ -44,8 +44,6 @@ public class CSVHelper {
         File file = new File(filePath);
 
         for(String[] s : list)
-            System.out.println(s[0]);
-
         try {
             // create FileWriter object with file as parameter
             FileWriter outputfile = new FileWriter(file);
