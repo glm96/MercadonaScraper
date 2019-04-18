@@ -1,0 +1,1 @@
+This program is meant to scrape through Mercadona's website and extract all the information on their products to a .csv file in order to use it on another project by the same author
