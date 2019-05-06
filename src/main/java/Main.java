@@ -1,16 +1,14 @@
-import com.opencsv.CSVWriter;
+
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -19,10 +17,11 @@ public class Main {
 
     private static String defHandle;
     private static List<String[]> data = new ArrayList<String[]>();
+    private static WebHelper helper;
 
     public static void main(String[] args) {
 
-
+        boolean flag, flag2=true, running = true;
 
         //support for chrome
         System.setProperty("webdriver.chrome.driver","C:\\chromedriver\\chromedriver.exe");
@@ -30,90 +29,237 @@ public class Main {
         //Initialize the browser and the waiting service
         ChromeDriver driver = new ChromeDriver();
         WebDriverWait wait = new WebDriverWait(driver,30);
-        String[] header = {"name", "barcode", "price"};
-        data.add(header);
 
-        WebHelper helper = new WebHelper(driver, wait);
+
+        helper = new WebHelper(driver, wait);
 
         helper.login();
 
         driver.get("https://www.telecompra.mercadona.es/ns/principal.php");
        // driver.switchTo().defaultContent();
-        waitSeconds(3);
+        waitSeconds(1);
         defHandle = driver.getWindowHandle();
-        driver.switchTo().frame("toc");
-        driver.switchTo().frame("menu");
+        helper.switchToMenu(driver);
         List<WebElement> elementlist = driver.findElements(By.tagName("li"));
 
-       /* //TEST TEST TEST
-        elementlist.get(0).findElement(By.tagName("a")).click();
-        elementlist.get(0).findElements(By.tagName("li")).get(0).findElement(By.tagName("a")).click();
+        //Fools the website into believing a human is navigating it
+        ((JavascriptExecutor)driver).executeScript("window.key = \"foobar\";");
 
-        helper.checkPageContent(defHandle,data);
-
-
-        for(String[] strings : data){
-            for(String s : strings){
-                System.out.print(s);
-                System.out.print(", ");
-            }
-            System.out.println("");
+        String cat = getCategory();
+        if(!cat.equals("")) {//There was a ban last run
+            data = readLastCSV();
+            elementlist = runAfterBan(elementlist, driver, getCategory()); //Specify category from last run
         }
-        //TEST TEST TEST
-        */
-
+        else{
+            String[] header = {"name", "barcode", "price"};
+            data.add(header);
+        }
         // Iterate through every category
+        List<String> banCat = new ArrayList<String>();
         for(WebElement element : elementlist) {
-            waitSeconds(1);
-            List<WebElement> elementlist2, elementlist3;
-            element.findElement(By.tagName("a")).click();
-            elementlist2 = element.findElements(By.tagName("li"));
-            if (elementlist2.size()<1) {
-                helper.checkPageContent(defHandle,data);
-                nextPage(driver,helper);
-            }
-            else {
-                for (WebElement element2 : elementlist2) {
-                    element2.findElement(By.tagName("a")).click();
-                    elementlist3 = element2.findElements(By.tagName("li"));
-                    if (elementlist3.size()<1) {
-                        helper.checkPageContent(defHandle,data);
-                        nextPage(driver,helper);
-                    } else {
-                        for (WebElement element3 : elementlist3) {
-                            element3.findElement(By.tagName("a")).click();
-                            helper.checkPageContent(defHandle,data);
-                            nextPage(driver,helper);
+
+
+            if(flag2) {//Checks whether last page showed a ban
+                List<WebElement> elementlist2, elementlist3;
+
+                element.findElement(By.tagName("a")).click();
+                elementlist2 = element.findElements(By.tagName("li"));
+
+                if (elementlist2.size() < 1) {//Reached a category
+                    flag = helper.checkPageContent(defHandle, data);
+                    if(!flag) { // if banned, print category and save it on a file for future use
+                        System.out.println(element.getText());
+                        banCat.add(element.getText());
+                        flag2 = false;
+                    }
+                    nextPage(driver);
+                }
+                else {
+                    for (WebElement element2 : elementlist2) {
+                        if (flag2) {
+                            element2.findElement(By.tagName("a")).click();
+                            elementlist3 = element2.findElements(By.tagName("li"));
+                            if (elementlist3.size() < 1) {//Reached a category
+                                flag = helper.checkPageContent(defHandle, data);
+                                if (!flag) { // if banned, print category and save it on a file for future use
+                                    System.out.println(element2.getText());
+                                    String s = element.getText();
+                                    banCat.add(s.substring(0,s.indexOf('\n')));
+                                    banCat.add(element2.getText());
+                                    flag2 = false;
+                                }
+                                nextPage(driver);
+                            } else {
+                                for (WebElement element3 : elementlist3) {//Reached a category
+                                    if(flag2) {
+                                        element3.findElement(By.tagName("a")).click();
+                                        flag = helper.checkPageContent(defHandle, data);
+                                        if (!flag) { // if banned, print category and save it on a file for future use
+                                            String s = element.getText();
+                                            banCat.add(s.substring(0,s.indexOf('\n')));
+                                            s = element2.getText();
+                                            banCat.add(s.substring(0,s.indexOf('\n')));
+                                            banCat.add(element3.getText());
+                                            flag2 = false;
+                                        }
+                                        nextPage(driver);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
+            else if(running){ //Banned, save current data
+                createCSV(data);
+                createBanFile(banCat);
+                running = false;
+            }
         }
 
-        CSVHelper csvHelper = new CSVHelper("C:\\Users\\tyrio\\eclipse-workspace\\mercadonaScraper\\csvtest.csv",data);
-        csvHelper.GenerateCSV();
-
+        createCSV(data);
+        driver.close();
 
     }
 
+    private static List<WebElement> runAfterBan(List<WebElement> list, ChromeDriver driver, String cat){
+        boolean flag = false, banned = false;
+        List<WebElement> res = new ArrayList<WebElement>();
+        List<WebElement> l2, l3;
+        String c1, c2, c3;
+        c1 = cat.substring(0,cat.indexOf("|"));
+        cat = cat.substring(cat.indexOf("|")+1);
+        c2 = cat.contains("|") ? cat.substring(0, cat.indexOf("|")) : ""; //if there is no level 2 subcategory, c2 = ""
+        c3 = cat.contains("|") ? cat.substring(cat.lastIndexOf("|") + 1) : ""; // same as above with lvl 3 subcat
+
+        List<String> banlist = new ArrayList<String>();
+        for(WebElement element : list){
+            if(!banned){
+                if(flag) //Add next categories to a list
+                    res.add(element);
+                else if(element.getText().equals(c1)){//level 1 category specified
+                    element.findElement(By.tagName("a")).click();
+                    if(c2.equals("")){
+                        banned = !helper.checkPageContent(defHandle,data);
+                        if(banned){
+                            banlist.add(element.getText());
+                            break;
+                        }
+                        nextPage(driver);
+                        flag = true; //got the data
+                    }
+                    else{//level 2+ category specified
+                        l2 = element.findElements(By.tagName("li"));
+                        for (WebElement element2 : l2){
+                            if(!banned){
+                                if(element2.getText().equals(c2) || flag) {
+                                    element2.findElement(By.tagName("a")).click();
+                                    if (c3.equals("")) {
+                                        banned = !helper.checkPageContent(defHandle, data);
+                                        if (banned) {
+                                            String s = element.getText();
+                                            banlist.add(s.substring(0, s.indexOf("\n")));
+                                            banlist.add(element2.getText());
+                                        }
+                                        nextPage(driver);
+                                        flag = true; //got the data
+                                    } else {//level 3 category specified
+                                        l3 = element2.findElements(By.tagName("li"));
+                                        for (WebElement element3 : l3) {
+                                            if (element3.getText().equals(c3) || flag) {
+                                                element3.findElement(By.tagName("a")).click();
+                                                banned = !helper.checkPageContent(defHandle, data);
+                                                if (banned) {
+                                                    String s = element.getText();
+                                                    banlist.add(s.substring(0, s.indexOf("\n")));
+                                                    s = element2.getText();
+                                                    banlist.add(s.substring(0, s.indexOf("\n")));
+                                                    banlist.add(element3.getText());
+                                                    break;
+                                                }
+                                                nextPage(driver);
+                                                flag = true; //got the data
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                                break;
+                        }
+
+                    }
+                }
+            }
+            else{
+                createBanFile(banlist);
+                return new ArrayList<WebElement>();
+            }
+        }
+        return res;
+    }
+    private static String  getCategory(){
+        String fileName = "C:\\Users\\tyrio\\eclipse-workspace\\mercadonaScraper\\banCategory.txt";
+        try{
+            File file = new File(fileName);
+            FileReader fileReader = new FileReader(file);
+            BufferedReader br = new BufferedReader(fileReader);
+            String s = br.readLine();
+            if(s==null)
+                return "";
+            return s;
+
+        }catch(Exception e){return "";}
+    }
+    private static void createBanFile(List<String> strings){
+        try {
+            PrintWriter writer = new PrintWriter("banCategory.txt", "UTF-8");
+            StringBuilder stringBuilder = new StringBuilder();
+            for(String s : strings){
+                stringBuilder.append(s);
+                stringBuilder.append("|");
+            }
+            String s = stringBuilder.toString().substring(0,stringBuilder.length()-1);
+            writer.print(s);
+            writer.close();
+        }catch(Exception e){e.printStackTrace();}
+    }
     private static void waitSeconds(int t){
         try {
             TimeUnit.SECONDS.sleep(t);
         }catch (Exception e){e.printStackTrace();}
     }
-
-    private static void checkResults(){
-        //ToDo Grab data and store it on a list
-       // helper.checkPageContent(defHandle,data);
+    private static void createCSV(List<String[]> data){
+        CSVHelper csvHelper;
+             csvHelper = new CSVHelper("C:\\Users\\tyrio\\eclipse-workspace\\mercadonaScraper\\EANdata.csv", data);
+        csvHelper.GenerateCSV();
     }
+    private static void nextPage(ChromeDriver driver){
+        helper.switchToMain(driver);
 
-    private static void nextPage(ChromeDriver driver, WebHelper helper){
-        System.out.println("in");
         try {
-            driver.findElement(By.xpath("/html/body/div[3]")).findElements(By.tagName("a")).get(1).click();
-            System.out.println("in2");
+            List<WebElement> list  = driver.findElement(By.xpath("/html/body/div[3]")).findElements(By.tagName("a"));
+            if(list.size()==2)
+                list.get(1).click();
+            else
+                list.get(2).click();
             waitSeconds(1);
             helper.checkPageContent(defHandle,data);
-        }catch (Exception e){System.out.println("out");}//section finished
+            nextPage(driver);
+        }catch (Exception e){}//section finished
+        helper.switchToMenu(driver);
     }
+    private static List<String[]> readLastCSV(){
+        List<String[]> records = new ArrayList<String[]>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("EANdata.csv"));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                records.add(values);
+            }
+        }catch(Exception e){e.printStackTrace();}
+        return records;
+    }
+
 }

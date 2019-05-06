@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="75b35816-ab7e-4ab5-b4fb-387b6f400ff1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="75b35816-ab7e-4ab5-b4fb-387b6f400ff1" name="Default Changelist" comment="Working scraper, bans handled by multiple executions of the program">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CSVHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CSVHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csvtest.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Credentials.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Credentials.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/WebHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/WebHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Credentials.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Credentials.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/WebHelper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/WebHelper.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -22,14 +24,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="331">
-              <caret line="78" column="48" lean-forward="true" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="14" />
+            <state relative-caret-position="190">
+              <caret line="23" column="20" selection-start-line="23" selection-start-column="20" selection-end-line="23" selection-end-column="20" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#627#637#0" expanded="true" />
+                <element signature="method#getCategory#0;class#Main#0" />
+                <element signature="method#waitSeconds#0;class#Main#0" />
+                <element signature="method#createCSV#0;class#Main#0" />
               </folding>
             </state>
           </provider>
@@ -38,19 +42,12 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/WebHelper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="163">
-              <caret line="34" column="5" lean-forward="true" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
+            <state relative-caret-position="343">
+              <caret line="32" column="5" selection-start-line="32" selection-start-column="5" selection-end-line="32" selection-end-column="10" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#319#320#0" expanded="true" />
-                <element signature="e#348#349#0" expanded="true" />
-                <element signature="e#398#399#0" expanded="true" />
-                <element signature="e#434#435#0" expanded="true" />
-                <element signature="e#472#473#0" expanded="true" />
-                <element signature="e#499#500#0" expanded="true" />
-                <element signature="e#546#547#0" expanded="true" />
-                <element signature="e#578#579#0" expanded="true" />
-                <element signature="e#2290#2357#0" />
+                <element signature="method#readPrice#0;class#WebHelper#0" />
+                <element signature="method#closeTab#0;class#WebHelper#0" />
               </folding>
             </state>
           </provider>
@@ -59,8 +56,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/CSVHelper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="163">
-              <caret line="45" column="30" selection-start-line="45" selection-start-column="30" selection-end-line="45" selection-end-column="30" />
+            <state relative-caret-position="391">
+              <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -68,11 +65,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/Credentials.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="17">
-              <caret line="1" column="42" selection-start-line="1" selection-start-column="42" selection-end-line="1" selection-end-column="42" />
+              <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="4" />
             </state>
           </provider>
         </entry>
@@ -90,6 +87,11 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>system.out.prin</find>
+      <find>defhandle</find>
+      <find>refresh</find>
+      <find>login()</find>
+      <find>login</find>
+      <find>refres</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -102,10 +104,10 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/CsvWriter.java" />
         <option value="$PROJECT_DIR$/src/main/java/credentials.java" />
-        <option value="$PROJECT_DIR$/src/main/java/Credentials.java" />
         <option value="$PROJECT_DIR$/src/main/java/CSVHelper.java" />
         <option value="$PROJECT_DIR$/src/main/java/WebHelper.java" />
         <option value="$PROJECT_DIR$/src/main/java/Main.java" />
+        <option value="$PROJECT_DIR$/src/main/java/Credentials.java" />
       </list>
     </option>
   </component>
@@ -117,10 +119,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="472" />
-    <option name="y" value="-19" />
-    <option name="width" value="1400" />
-    <option name="height" value="1000" />
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -129,7 +131,6 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -159,6 +160,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -211,7 +213,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18176973" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.08208955" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -220,7 +222,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.28710726" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -228,7 +230,7 @@
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Messages" order="10" weight="0.32936078" />
+      <window_info active="true" anchor="bottom" id="Messages" order="10" visible="true" weight="0.32827735" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -238,6 +240,10 @@
       <window_info anchor="right" id="Capture Analysis" order="6" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
     </layout>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Working scraper, bans handled by multiple executions of the program" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working scraper, bans handled by multiple executions of the program" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/CsvWriter.java" />
@@ -253,10 +259,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/CSVHelper.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="45" column="30" selection-start-line="45" selection-start-column="30" selection-end-line="45" selection-end-column="30" />
+        <state relative-caret-position="391">
+          <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/WebHelper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="343">
+          <caret line="32" column="5" selection-start-line="32" selection-start-column="5" selection-end-line="32" selection-end-column="10" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#readPrice#0;class#WebHelper#0" />
+            <element signature="method#closeTab#0;class#WebHelper#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="23" column="20" selection-start-line="23" selection-start-column="20" selection-end-line="23" selection-end-column="20" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#getCategory#0;class#Main#0" />
+            <element signature="method#waitSeconds#0;class#Main#0" />
+            <element signature="method#createCSV#0;class#Main#0" />
           </folding>
         </state>
       </provider>
@@ -264,37 +295,7 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/Credentials.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
-          <caret line="1" column="42" selection-start-line="1" selection-start-column="42" selection-end-line="1" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/WebHelper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="34" column="5" lean-forward="true" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#319#320#0" expanded="true" />
-            <element signature="e#348#349#0" expanded="true" />
-            <element signature="e#398#399#0" expanded="true" />
-            <element signature="e#434#435#0" expanded="true" />
-            <element signature="e#472#473#0" expanded="true" />
-            <element signature="e#499#500#0" expanded="true" />
-            <element signature="e#546#547#0" expanded="true" />
-            <element signature="e#578#579#0" expanded="true" />
-            <element signature="e#2290#2357#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
-          <caret line="78" column="48" lean-forward="true" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="14" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#627#637#0" expanded="true" />
-          </folding>
+          <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="4" />
         </state>
       </provider>
     </entry>

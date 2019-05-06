@@ -1,5 +1,6 @@
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -39,7 +40,8 @@ public class WebHelper {
         String loginURL = "https://www.telecompra.mercadona.es/ns/entrada.php?js=1";
 
         System.out.println("Logging in");
-        driver.navigate().to(loginURL);
+       // driver.navigate().to(loginURL);
+        driver.get(loginURL);
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath(submitbutton)));
         driver.findElementById("username").sendKeys(Credentials.USERNAME);
         driver.findElementById("password").sendKeys(Credentials.PASSWORD);
@@ -47,77 +49,108 @@ public class WebHelper {
         driver.findElement(By.xpath(submitbutton)).click();
     }
 
-    public void checkPageContent(String defHandle, List<String[]> data){
+    public boolean checkPageContent(String defHandle, List<String[]> data){
             //Switch to list frame
-
+            waitSeconds(1);
+            boolean res = checkBan();
             driver.switchTo().defaultContent();
             driver.switchTo().frame("mainFrame");
-            //Get list of all tr elements in this page
-            List<WebElement> testelements = driver.findElement(By.xpath("//*[@id=\"TaulaLlista\"]/tbody")).findElements(By.tagName("tr"));
-            //Save data for every item on this page
-            for (WebElement el : testelements) {
-                try {
-                    boolean flag = true;
-                    int index = 0;
-                    List<WebElement> tdelements = el.findElements(By.tagName("td"));
+            if(res) {
+                //Get list of all tr elements in this page
+                List<WebElement> testelements = driver.findElement(By.xpath("//*[@id=\"TaulaLlista\"]/tbody")).findElements(By.tagName("tr"));
+                //Save data for every item on this page
+                for (WebElement el : testelements) {
                     try {
-                        tdelements.get(1).findElement(By.tagName("a"));
-                    } catch (Exception e) {
-                        flag = false; // No details on this product, skip it.
-                    }
-                    if (flag) {
-                        String name = tdelements.get(0).getText();
-                        String price = tdelements.get(2).getText();
+                        boolean flag = true;
+                        List<WebElement> tdelements = el.findElements(By.tagName("td"));
                         try {
-                            index = Math.min(price.indexOf(" "), price.indexOf("\n"));
-                            if (index == -1){
-                                index = Math.max(price.indexOf(" "), price.indexOf("\n"));
-                                if (index == -1) {
-                                    index = price.length() - 1;
-                                }
+                            tdelements.get(1).findElement(By.tagName("a"));
+                        } catch (Exception e) {
+                            flag = false; // No details on this product, skip it.
+                        }
+                        if (flag) {
+                            String name = tdelements.get(0).getText();
+                            String price = tdelements.get(2).getText();
+                            price = readPrice(price);
+                            tdelements.get(1).findElement(By.tagName("a")).click();
+                            for (String s : driver.getWindowHandles()) {
+                                if (!s.equals(defHandle))
+                                    driver.switchTo().window(s);
                             }
-                        } catch (StringIndexOutOfBoundsException e) {
-                            index = price.length() - 1;
+                            if(!checkBan()) {//Check if user is banned and needs to reconnect
+                                res = false;
+                                closeTab(driver, defHandle);
+                                break;
+                            }
+                            price = price.substring(0,price.indexOf(","))+"."+price.substring(price.indexOf(",")+1);
+                            String EAN = driver.findElement(By.xpath("/html/body/div[2]/div[2]/div[1]/div/dl/dd[4]")).getText();
+                            String[] entity = {name, EAN, price};
+                            data.add(entity);
+                            closeTab(driver, defHandle);
                         }
-                        price = price.substring(0, index);
-                        tdelements.get(1).findElement(By.tagName("a")).click();
-                        for (String s : driver.getWindowHandles()) {
-                            if (!s.equals(defHandle))
-                                driver.switchTo().window(s);
-                        }
-                        checkBan();
-                       // wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[2]/div[2]/div[1]/div/dl/dd[4]")));
-                        String EAN = driver.findElement(By.xpath("/html/body/div[2]/div[2]/div[1]/div/dl/dd[4]")).getText();
-                        String[] entity = {name, EAN, price};
-                        data.add(entity);
-                        driver.close();
-                        driver.switchTo().window(defHandle);
-                        driver.switchTo().defaultContent();
-                        driver.switchTo().frame("mainFrame");
-                    }
-                }catch (Exception e) {
-                    driver.close();
-                    driver.switchTo().window(defHandle);
-                    driver.switchTo().defaultContent();
-                    driver.switchTo().frame("mainFrame");
-                }//Different structure details page, skip it
+                    } catch (Exception e) {
+                        closeTab(driver, defHandle);
+                    }//Different structure details page, skip it
+                }
             }
             driver.switchTo().window(defHandle);
-            driver.switchTo().defaultContent();
-            driver.switchTo().frame("toc");
-            driver.switchTo().frame("menu");
+            switchToMenu(driver);
+            return res;
     }
 
-    private void checkBan (){
+    private boolean checkBan (){
 
+        boolean res = true;
         //System.out.println(driver.findElement(By.xpath("/html/body")).getText().trim());
-        if(driver.findElement(By.xpath("/html/body")).getText().trim().contains("The requested URL was rejected. Please consult with your administrator.")){
-            System.out.println("In");
-            String url = driver.getCurrentUrl();
-            login();
-            driver.get(url);
-            waitSeconds(5);
+        if(driver.getCurrentUrl().trim().equals("https://www.telecompra.mercadona.es/ns/principal.php")){ //Check for ban on main screen
+            ((JavascriptExecutor)driver).executeScript("window.key = \"blabla\";");
+            driver.switchTo().defaultContent();
+            driver.switchTo().frame("mainFrame");
+            String body = driver.findElementByTagName("body").getText();
+            if(body.trim().contains("The requested URL was rejected.")){
+                res = false;
+            }
+            }
+
+
+        else if(driver.findElement(By.xpath("/html/body")).getText().trim().contains("The requested URL was rejected.")){
+            res = false;
         }
+        return res;
+
+    }
+
+    public void switchToMenu(ChromeDriver driver){
+        driver.switchTo().defaultContent();
+        driver.switchTo().frame("toc");
+        driver.switchTo().frame("menu");
+    }
+
+    public void switchToMain(ChromeDriver driver){
+        driver.switchTo().defaultContent();
+        driver.switchTo().frame("mainFrame");
+    }
+
+    private String readPrice(String price){
+        int index;
+        try { //Get the price out of every different possible format
+            index = Math.min(price.indexOf(" "), price.indexOf("\n"));
+            if (index == -1){
+                index = Math.max(price.indexOf(" "), price.indexOf("\n"));
+                if (index == -1) {
+                    index = price.length() - 1;
+                }
+            }
+        } catch (StringIndexOutOfBoundsException e) {
+            index = price.length() - 1;
+        }
+        return price.substring(0, index);
+    }
+    private static void closeTab(WebDriver driver, String defHandle){
+        driver.close();
+        driver.switchTo().window(defHandle);
+        driver.switchTo().defaultContent();
+        driver.switchTo().frame("mainFrame");
     }
     private static void waitSeconds(int t){
         try {
