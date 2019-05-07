@@ -127,7 +127,7 @@ public class Main {
         List<WebElement> res = new ArrayList<WebElement>();
         List<WebElement> l2, l3;
         String c1, c2, c3;
-        c1 = cat.substring(0,cat.indexOf("|"));
+        c1 = !cat.contains("|") ? cat : cat.substring(0,cat.indexOf("|"))  ;
         cat = cat.substring(cat.indexOf("|")+1);
         c2 = cat.contains("|") ? cat.substring(0, cat.indexOf("|")) : ""; //if there is no level 2 subcategory, c2 = ""
         c3 = cat.contains("|") ? cat.substring(cat.lastIndexOf("|") + 1) : ""; // same as above with lvl 3 subcat
@@ -154,7 +154,8 @@ public class Main {
                             if(!banned){
                                 if(element2.getText().equals(c2) || flag) {
                                     element2.findElement(By.tagName("a")).click();
-                                    if (c3.equals("")) {
+                                    l3 = element2.findElements(By.tagName("li"));
+                                    if (c3.equals("") || l3.size()<1) {
                                         banned = !helper.checkPageContent(defHandle, data);
                                         if (banned) {
                                             String s = element.getText();
@@ -164,7 +165,6 @@ public class Main {
                                         nextPage(driver);
                                         flag = true; //got the data
                                     } else {//level 3 category specified
-                                        l3 = element2.findElements(By.tagName("li"));
                                         for (WebElement element3 : l3) {
                                             if (element3.getText().equals(c3) || flag) {
                                                 element3.findElement(By.tagName("a")).click();

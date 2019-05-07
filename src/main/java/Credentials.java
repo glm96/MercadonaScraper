@@ -1,4 +1,4 @@
 public interface Credentials {
-    String USERNAME = "MERCSCRAP1234@GMAIL.COM";
+    String USERNAME = "xavoku@dc-business.com";
     String PASSWORD = "Scrapity1";
 }
