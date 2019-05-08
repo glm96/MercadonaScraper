@@ -1,7 +1,4 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -57,6 +54,12 @@ public class WebHelper {
             driver.switchTo().frame("mainFrame");
             if(res) {
                 //Get list of all tr elements in this page
+                try {
+                    wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"TaulaLlista\"]/tbody")));
+                }catch(TimeoutException e){ //In case the web doesn't load, return false so progress is saved
+                    switchToMenu(driver);
+                    return false;
+                }
                 List<WebElement> testelements = driver.findElement(By.xpath("//*[@id=\"TaulaLlista\"]/tbody")).findElements(By.tagName("tr"));
                 //Save data for every item on this page
                 for (WebElement el : testelements) {

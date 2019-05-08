@@ -60,7 +60,7 @@ public class Main {
 
 
             if(flag2) {//Checks whether last page showed a ban
-                List<WebElement> elementlist2, elementlist3;
+                List<WebElement> elementlist2, elementlist3, elementlist4;
 
                 element.findElement(By.tagName("a")).click();
                 elementlist2 = element.findElements(By.tagName("li"));
@@ -92,17 +92,40 @@ public class Main {
                             } else {
                                 for (WebElement element3 : elementlist3) {//Reached a category
                                     if(flag2) {
-                                        element3.findElement(By.tagName("a")).click();
-                                        flag = helper.checkPageContent(defHandle, data);
-                                        if (!flag) { // if banned, print category and save it on a file for future use
-                                            String s = element.getText();
-                                            banCat.add(s.substring(0,s.indexOf('\n')));
-                                            s = element2.getText();
-                                            banCat.add(s.substring(0,s.indexOf('\n')));
-                                            banCat.add(element3.getText());
-                                            flag2 = false;
+                                        elementlist4 = element2.findElements(By.tagName("li"));
+                                        if(elementlist4.size() < 1) {
+                                            element3.findElement(By.tagName("a")).click();
+                                            flag = helper.checkPageContent(defHandle, data);
+                                            if (!flag) { // if banned, print category and save it on a file for future use
+                                                String s = element.getText();
+                                                banCat.add(s.substring(0, s.indexOf('\n')));
+                                                s = element2.getText();
+                                                banCat.add(s.substring(0, s.indexOf('\n')));
+                                                banCat.add(element3.getText());
+                                                flag2 = false;
+                                            }
+                                            nextPage(driver);
                                         }
-                                        nextPage(driver);
+                                        else {
+                                            for(WebElement element4 : elementlist4) {
+                                                if(flag2){
+                                                    element4.findElement(By.tagName("a")).click();
+                                                    flag = helper.checkPageContent(defHandle, data);
+                                                    if (!flag) { // if banned, print category and save it on a file for future use
+                                                        String s = element.getText();
+                                                        banCat.add(s.substring(0, s.indexOf('\n')));
+                                                        s = element2.getText();
+                                                        banCat.add(s.substring(0, s.indexOf('\n')));
+                                                        s = element3.getText();
+                                                        s = s.contains("\n") ? s.substring(0,s.indexOf('\n')) : s;
+                                                        banCat.add(s);
+                                                        banCat.add(element4.getText());
+                                                        flag2 = false;
+                                                    }
+                                                    nextPage(driver);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -125,12 +148,14 @@ public class Main {
     private static List<WebElement> runAfterBan(List<WebElement> list, ChromeDriver driver, String cat){
         boolean flag = false, banned = false;
         List<WebElement> res = new ArrayList<WebElement>();
-        List<WebElement> l2, l3;
+        List<WebElement> l2, l3, l4;
         String c1, c2, c3;
         c1 = !cat.contains("|") ? cat : cat.substring(0,cat.indexOf("|"))  ;
         cat = cat.substring(cat.indexOf("|")+1);
         c2 = cat.contains("|") ? cat.substring(0, cat.indexOf("|")) : ""; //if there is no level 2 subcategory, c2 = ""
         c3 = cat.contains("|") ? cat.substring(cat.lastIndexOf("|") + 1) : ""; // same as above with lvl 3 subcat
+        c3 = cat.contains("\n") ? cat.substring(0,cat.indexOf("\n")) : c3;
+
 
         List<String> banlist = new ArrayList<String>();
         for(WebElement element : list){
@@ -168,17 +193,36 @@ public class Main {
                                         for (WebElement element3 : l3) {
                                             if (element3.getText().equals(c3) || flag) {
                                                 element3.findElement(By.tagName("a")).click();
-                                                banned = !helper.checkPageContent(defHandle, data);
-                                                if (banned) {
-                                                    String s = element.getText();
-                                                    banlist.add(s.substring(0, s.indexOf("\n")));
-                                                    s = element2.getText();
-                                                    banlist.add(s.substring(0, s.indexOf("\n")));
-                                                    banlist.add(element3.getText());
-                                                    break;
+                                                l4 = element3.findElements(By.tagName("li"));
+                                                if(l4.size()<1) {
+                                                    banned = !helper.checkPageContent(defHandle, data);
+                                                    if (banned) {
+                                                        String s = element.getText();
+                                                        banlist.add(s.substring(0, s.indexOf("\n")));
+                                                        s = element2.getText();
+                                                        banlist.add(s.substring(0, s.indexOf("\n")));
+                                                        banlist.add(element3.getText());
+                                                        break;
+                                                    }
+                                                    nextPage(driver);
+                                                    flag = true; //got the data
                                                 }
-                                                nextPage(driver);
-                                                flag = true; //got the data
+                                                else{
+                                                    for(WebElement element4 : l4){
+                                                        element4.findElement(By.tagName("a")).click();
+                                                        banned = !helper.checkPageContent(defHandle,data);
+                                                        if (banned) {
+                                                            String s = element.getText();
+                                                            banlist.add(s.substring(0, s.indexOf("\n")));
+                                                            s = element2.getText();
+                                                            banlist.add(s.substring(0, s.indexOf("\n")));
+                                                            banlist.add(element3.getText());
+                                                            break;
+                                                        }
+                                                        nextPage(driver);
+                                                        flag = true; //got the data
+                                                    }
+                                                }
                                             }
                                         }
                                     }
